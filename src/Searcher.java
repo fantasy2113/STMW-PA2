@@ -53,7 +53,7 @@ public class Searcher {
         }
     }
 
-    private static void setInput(String... args) {
+    private static void setInput(String... args) throws Exception {
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-x")) {
                 lon = args[i + 1];
