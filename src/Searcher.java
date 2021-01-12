@@ -42,9 +42,8 @@ public class Searcher {
             TopDocs topDocs = indexSearcher.search(query, 10000);
             System.out.println("Number of Hits: " + topDocs.totalHits);
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-                Document document = indexSearcher.doc(scoreDoc.doc);
-                System.out.println("doc_id: " + document.get("doc_id")
-                        + ", score: " + scoreDoc.score + " [" + document.get("line") + "]");
+                Document doc = indexSearcher.doc(scoreDoc.doc);
+                System.out.println("id: " + doc.get("id") + ", " + doc.get("name") + ", score: " + scoreDoc.score + ", price: " + doc.get("price"));
             }
             return topDocs;
         } catch (Exception e) {
