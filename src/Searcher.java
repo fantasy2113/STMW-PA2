@@ -12,17 +12,8 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class Searcher {
-
-  private static String width = null;
-  private static String lat = null;
-  private static String lon = null;
-  private static boolean isGeo = false;
 
   public Searcher() {
   }
@@ -47,9 +38,9 @@ public class Searcher {
       for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
         Document doc = indexSearcher.doc(scoreDoc.doc);
         String out = "id: " + doc.get("id") + ", " + doc.get("name") + ", score: " + scoreDoc.score + ", price: " + doc.get("price") + ", coordinates: " + doc.get("has_coordinates");
-        if (isGeo) {
-          double dist = getDist(doc.get("id"));
-          if (dist < Double.parseDouble(width)) {
+        if (jdbc.isGeo) {
+          double dist = jdbc.getDist(doc.get("id"));
+          if (dist < Double.parseDouble(jdbc.width)) {
             out += ", dist: " + String.format("%.2f", dist);
             System.out.println(out);
           }
@@ -67,17 +58,17 @@ public class Searcher {
   private static void setInput(String... args) throws Exception {
     for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-x")) {
-        lon = args[i + 1];
+        jdbc.lon = args[i + 1];
       }
       if (args[i].equals("-y")) {
-        lat = args[i + 1];
+        jdbc.lat = args[i + 1];
       }
       if (args[i].equals("-w")) {
-        width = args[i + 1];
+        jdbc.width = args[i + 1];
       }
     }
-    if (lon != null && lat != null && width != null) {
-      isGeo = true;
+    if (jdbc.lon != null && jdbc.lat != null && jdbc.width != null) {
+      jdbc.isGeo = true;
     }
   }
 
@@ -87,29 +78,9 @@ public class Searcher {
     for (int i = 1; i < terms.length; i++) {
       sb.append(" OR line:").append(terms[i]);
     }
-    if (isGeo) {
+    if (jdbc.isGeo) {
       sb.append(" AND has_coordinates:true");
     }
     return sb.toString();
-  }
-
-  public static double getDist(String itemId) {
-    double dist = -1;
-    Connection conn = null;
-    Statement stmt = null;
-    try {
-      conn = DbManager.getConnection(true);
-      stmt = conn.createStatement();
-      String sql = "SELECT item_id, Distance(Point(" + lon + "," + lat + "), coord) AS dist FROM spatial_index WHERE item_id = " + itemId + " LIMIT 1;";
-      ResultSet rs = stmt.executeQuery(sql);
-      if (rs.next()) {
-        dist = rs.getDouble("dist");
-      }
-      rs.close();
-      conn.close();
-    } catch (SQLException ex) {
-      ex.printStackTrace();
-    }
-    return dist;
   }
 }
