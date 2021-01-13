@@ -32,7 +32,7 @@ public class Indexer {
         doc.add(new TextField("line", item.getLine().trim(), Field.Store.YES));
         doc.add(new TextField("name", item.getName().trim(), Field.Store.YES));
         doc.add(new FloatField("price", item.getPrice(), Field.Store.YES));
-        doc.add(new IntField("hasCoordinates", item.isHasCategory() ? 1 : 0, Field.Store.YES));
+        doc.add(new TextField("has_coordinates", item.isHasCategory() ? "true" : "false", Field.Store.YES));
         try {
             indexWriter.addDocument(doc);
         } catch (Exception e) {

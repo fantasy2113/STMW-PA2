@@ -4,10 +4,7 @@ import java.nio.file.Paths;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
@@ -17,9 +14,10 @@ import java.nio.file.Path;
 
 public class Searcher {
 
-    private static String width;
-    private static String lat;
-    private static String lon;
+    private static String width = null;
+    private static String lat = null;
+    private static String lon = null;
+    private static boolean isGeo = false;
 
     public Searcher() {
     }
@@ -38,7 +36,7 @@ public class Searcher {
             IndexReader indexReader = DirectoryReader.open(directory);
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
             QueryParser queryParser = new QueryParser("line", new SimpleAnalyzer());
-            Query query = queryParser.parse(searchText);
+            Query query = queryParser.parse(getQuery(searchText));
             TopDocs topDocs = indexSearcher.search(query, 10000);
             System.out.println("Number of Hits: " + topDocs.totalHits);
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
@@ -64,5 +62,20 @@ public class Searcher {
                 width = args[i + 1];
             }
         }
+        if (lon != null && lat != null && width != null) {
+            isGeo = true;
+        }
+    }
+
+    private static String getQuery(String searchText) {
+        String[] terms = searchText.split(" ");
+        StringBuilder sb = new StringBuilder("line:" + terms[0]);
+        for (int i = 1; i < terms.length; i++) {
+            sb.append(" OR line:").append(terms[i]);
+        }
+        if (isGeo) {
+            sb.append(" AND has_coordinates:true");
+        }
+        return sb.toString();
     }
 }
