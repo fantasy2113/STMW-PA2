@@ -1,19 +1,29 @@
-CREATE TABLE IF NOT EXISTS `spatial_index`
+use
+ad;
+
+CREATE TABLE IF NOT EXISTS spatial_index
 (
-    `item_id` INT(11) NOT NULL,
-    `coord`   POINT NOT NULL,
-    PRIMARY KEY (`item_id`),
-    UNIQUE INDEX `item_id_UNIQUE` (`item_id` ASC),
-    INDEX     `coord_idx` (`coord` ASC)
+    item_id INT
+(
+    11
+) NOT NULL,
+    coord POINT NOT NULL
     ) ENGINE = MyISAM;
 
-INSERT INTO spatial_index ( item_id, coord)
-SELECT  item_coordinates.item_id, Point(item_coordinates.longitude, item_coordinates.latitude)
-FROM    item_coordinates;
+CREATE
+SPATIAL INDEX coord_index ON spatial_index (coord);
 
-ALTER TABLE `has_category`
-    CHANGE COLUMN `item_id` `item_id` INT(11) NOT NULL ,
-    CHANGE COLUMN `category_name` `category_name` VARCHAR(128) NOT NULL;
+INSERT INTO spatial_index (item_id, coord)
+SELECT item_coordinates.item_id, Point(item_coordinates.longitude, item_coordinates.latitude)
+FROM item_coordinates;
 
-ALTER TABLE `has_category`
-    ADD PRIMARY KEY (`item_id`, `category_name`);
+CREATE TABLE has_category_idx
+(
+    item_id       INT(11) NOT NULL,
+    category_name VARCHAR(128) NOT NULL,
+    PRIMARY KEY (item_id, category_name)
+);
+
+INSERT INTO has_category_idx (item_id, category_name)
+SELECT has_category.item_id, has_category.category_name
+FROM has_category;

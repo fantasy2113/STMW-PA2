@@ -1,16 +1,19 @@
-import java.lang.*;
-import java.util.*;
-import java.sql.*;
-
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.document.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Indexer {
 
@@ -19,7 +22,7 @@ public class Indexer {
 
     public static IndexWriter indexWriter;
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         String usage = "java Indexer";
         Collection<Item> items = getItems();
         rebuildIndexes("indexes", items);
@@ -68,7 +71,7 @@ public class Indexer {
         try {
             conn = DbManager.getConnection(true);
             stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT item.*,  item_coordinates.latitude, buy_price.buy_price, has_category.category_name FROM item LEFT JOIN item_coordinates ON item.item_id = item_coordinates.item_id LEFT JOIN has_category ON item.item_id = has_category.item_id LEFT JOIN buy_price ON item.item_id = buy_price.item_id ORDER BY item.item_id ASC;");
+            ResultSet rs = stmt.executeQuery("SELECT item.*,  item_coordinates.latitude, buy_price.buy_price, has_category_idx.category_name FROM item LEFT JOIN item_coordinates ON item.item_id = item_coordinates.item_id LEFT JOIN has_category_idx ON item.item_id = has_category_idx.item_id LEFT JOIN buy_price ON item.item_id = buy_price.item_id ORDER BY item.item_id ASC;");
             while (rs.next()) {
                 final long item_id = rs.getLong("item_id");
                 if (!itemMap.containsKey(item_id)) {
