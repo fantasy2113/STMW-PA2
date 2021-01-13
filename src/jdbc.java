@@ -12,8 +12,7 @@ public class jdbc {
   public static String lat = null;
   public static String lon = null;
   public static boolean isGeo = false;
-  private static final String SQL_MBR_1 = "SELECT item_id FROM spatial_index WHERE MBRContains(LineString(Point(@lon+@width/(111.1/COS(RADIANS(@lat))),@lat+@width/111.1),Point(@lon-@width/(111.1/COS(RADIANS(@lat))),@lat-@width/111.1)),coord);";
-  private static final String SQL_MBR_2 = "SELECT item_id, MBRContains(LineString(Point(@lon+@width/(111.1/COS(RADIANS(@lat))),@lat+@width/111.1),Point(@lon-@width/(111.1/COS(RADIANS(@lat))),@lat-@width/111.1)),coord) AS is_contains FROM spatial_index WHERE item_id=@id LIMIT 1;";
+  private static final String SQL_MBR_CONTAINS = "SELECT item_id, MBRContains(LineString(Point(@lon+@width/(111.1/COS(RADIANS(@lat))),@lat+@width/111.1),Point(@lon-@width/(111.1/COS(RADIANS(@lat))),@lat-@width/111.1)),coord) AS is_contains FROM spatial_index WHERE item_id=@id LIMIT 1;";
   private static final String SQL_DIST = "SELECT (((acos(sin((@lat*pi()/180))*sin((latitude*pi()/180))+cos((@lat*pi()/180))*cos((latitude*pi()/180)) * cos(((@lon-longitude)*pi()/180))))*180/pi())*60*1.1515 ) AS distance FROM item_coordinates WHERE item_id=@id LIMIT 1;";
 
   public jdbc() {
@@ -111,7 +110,7 @@ public class jdbc {
     try {
       conn = DbManager.getConnection(true);
       stmt = conn.createStatement();
-      String sql = SQL_MBR_2
+      String sql = SQL_MBR_CONTAINS
         .replace("@lat", lat)
         .replace("@lon", lon)
         .replace("@width", width)
@@ -152,7 +151,5 @@ public class jdbc {
     }
     return result;
   }
-
-
 }
 
