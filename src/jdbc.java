@@ -18,10 +18,10 @@ public class jdbc {
 
   public static void main(String[] args) {
     String usage = "java jdbc";
-    rebuildIndexes("indexes");
+    count("indexes");
   }
 
-  public static void rebuildIndexes(String indexPath) {
+  public static void count(String indexPath) {
     Connection conn = null;
     Statement stmt = null;
     try {
