@@ -17,10 +17,10 @@ import java.util.Map;
 
 public class Indexer {
 
+    public static IndexWriter indexWriter;
+
     public Indexer() {
     }
-
-    public static IndexWriter indexWriter;
 
     public static void main(String[] args) throws Exception {
         String usage = "java Indexer";
@@ -94,7 +94,7 @@ public class Indexer {
                 }
             }
         } catch (
-                SQLException ex) {
+          SQLException ex) {
             ex.printStackTrace();
         } finally {
             if (stmt != null) stmt.close();
