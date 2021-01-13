@@ -38,13 +38,11 @@ public class Searcher {
       for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
         Document doc = indexSearcher.doc(scoreDoc.doc);
         String out = "id: " + doc.get("id") + ", " + doc.get("name") + ", score: " + scoreDoc.score + ", price: " + doc.get("price") + ", coordinates: " + doc.get("has_coordinates");
-        if (jdbc.isGeo) {
-          double dist = jdbc.getDist(doc.get("id"));
-          if (dist < Double.parseDouble(jdbc.width)) {
-            out += ", dist: " + String.format("%.2f", dist);
-            System.out.println(out);
-          }
-        } else {
+        if (jdbc.isGeo && jdbc.isMbrContains(doc.get("id"))) {
+          double distance = jdbc.getDistance(doc.get("id"));
+          out += ", dist: " + String.format("%.2f", distance);
+          System.out.println(out);
+        } else if (!jdbc.isGeo) {
           System.out.println(out);
         }
       }

@@ -12,6 +12,9 @@ public class jdbc {
   public static String lat = null;
   public static String lon = null;
   public static boolean isGeo = false;
+  private static final String SQL_MBR_1 = "SELECT item_id FROM spatial_index WHERE MBRContains(LineString(Point(@lon+@width/(111.1/COS(RADIANS(@lat))),@lat+@width/111.1),Point(@lon-@width/(111.1/COS(RADIANS(@lat))),@lat-@width/111.1)),coord);";
+  private static final String SQL_MBR_2 = "SELECT item_id, MBRContains(LineString(Point(@lon+@width/(111.1/COS(RADIANS(@lat))),@lat+@width/111.1),Point(@lon-@width/(111.1/COS(RADIANS(@lat))),@lat-@width/111.1)),coord) AS is_contains FROM spatial_index WHERE item_id=@id LIMIT 1;";
+  private static final String SQL_DIST = "SELECT (((acos(sin((@lat*pi()/180))*sin((latitude*pi()/180))+cos((@lat*pi()/180))*cos((latitude*pi()/180)) * cos(((@lon-longitude)*pi()/180))))*180/pi())*60*1.1515 ) AS distance FROM item_coordinates WHERE item_id=@id LIMIT 1;";
 
   public jdbc() {
   }
@@ -100,5 +103,56 @@ public class jdbc {
     }
     return dist;
   }
+
+  public static boolean isMbrContains(String itemId) {
+    boolean result = false;
+    Connection conn = null;
+    Statement stmt = null;
+    try {
+      conn = DbManager.getConnection(true);
+      stmt = conn.createStatement();
+      String sql = SQL_MBR_2
+        .replace("@lat", lat)
+        .replace("@lon", lon)
+        .replace("@width", width)
+        .replace("@id", itemId);
+      ResultSet rs = stmt.executeQuery(sql);
+      if (rs.next()) {
+        if (rs.getInt("is_contains") == 1) {
+          result = true;
+        }
+      }
+      rs.close();
+      conn.close();
+    } catch (SQLException ex) {
+      ex.printStackTrace();
+    }
+    return result;
+  }
+
+  public static double getDistance(String itemId) {
+    double result = -1;
+    Connection conn = null;
+    Statement stmt = null;
+    try {
+      conn = DbManager.getConnection(true);
+      stmt = conn.createStatement();
+      String sql = SQL_DIST
+        .replace("@lat", lat)
+        .replace("@lon", lon)
+        .replace("@id", itemId);
+      ResultSet rs = stmt.executeQuery(sql);
+      if (rs.next()) {
+        result = rs.getDouble("distance");
+      }
+      rs.close();
+      conn.close();
+    } catch (SQLException ex) {
+      ex.printStackTrace();
+    }
+    return result;
+  }
+
+
 }
 
