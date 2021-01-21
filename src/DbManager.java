@@ -8,8 +8,7 @@ public class DbManager {
   static private final String databaseURL = "jdbc:mysql://localhost:3306/";
   static private final String dbname = "ad";
   static private final String username = "ad";
-  //static private String password = "ad";
-  static private final String password = "adad";
+  static private final String password = "ad";
 
   static {
     try {
