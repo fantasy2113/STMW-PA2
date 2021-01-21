@@ -1,23 +1,22 @@
-use
-ad;
-
-CREATE TABLE IF NOT EXISTS spatial_index
+CREATE TABLE IF NOT EXISTS ad.spatial_index
 (
     item_id INT
 (
     11
 ) NOT NULL,
     coord POINT NOT NULL
-    ) ENGINE = MyISAM;
+    ) engine = myisam;
 
 CREATE
-SPATIAL INDEX coord_index ON spatial_index (coord);
+SPATIAL INDEX coord_index ON ad.spatial_index (coord);
 
-INSERT INTO spatial_index (item_id, coord)
-SELECT item_coordinates.item_id, Point(item_coordinates.longitude, item_coordinates.latitude)
-FROM item_coordinates;
+INSERT INTO ad.spatial_index
+    (item_id, coord)
+SELECT ad.item_coordinates.item_id,
+       Point(ad.item_coordinates.longitude, ad.item_coordinates.latitude)
+FROM ad.item_coordinates;
 
-CREATE TABLE IF NOT EXISTS has_category_idx
+CREATE TABLE IF NOT EXISTS ad.has_category_idx
 (
     item_id INT
 (
@@ -34,6 +33,8 @@ CREATE TABLE IF NOT EXISTS has_category_idx
 )
     );
 
-INSERT INTO has_category_idx (item_id, category_name)
-SELECT has_category.item_id, has_category.category_name
-FROM has_category;
+INSERT INTO ad.has_category_idx
+    (item_id, category_name)
+SELECT ad.has_category.item_id,
+       ad.has_category.category_name
+FROM ad.has_category;
